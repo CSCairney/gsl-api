@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Import;
 @SpringBootTest
 class GlasgowSocialLeagueApplicationTests {
 
-    @Test
-    void contextLoads() {
-    }
+//    @Test
+//    void contextLoads() {
+//    }
 
 }

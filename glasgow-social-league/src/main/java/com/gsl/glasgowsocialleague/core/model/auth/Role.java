@@ -1,5 +1,6 @@
 package com.gsl.glasgowsocialleague.core.model.auth;
 
+import com.gsl.glasgowsocialleague.core.model.account.Account;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -8,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -30,4 +32,6 @@ public class Role {
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, Object> permissions;
 
+    @OneToMany(mappedBy = "role")
+    private List<Account> accounts;
 }

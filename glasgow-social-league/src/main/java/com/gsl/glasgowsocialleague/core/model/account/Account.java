@@ -1,9 +1,7 @@
 package com.gsl.glasgowsocialleague.core.model.account;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.gsl.glasgowsocialleague.core.model.auth.Role;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -33,6 +31,14 @@ public class Account {
     @Column(name = "email", nullable = false, length = 100)
     private String email;
 
+    @NotNull
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
     @Column(name = "profile_picture", length = Integer.MAX_VALUE)
     private String profilePicture;
 
@@ -43,5 +49,4 @@ public class Account {
     @ColumnDefault("now()")
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
-
 }

@@ -30,30 +30,50 @@ ext {
 }
 
 dependencies {
+    // Spring Boot Starters
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-rest'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Flyway for database migrations
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
+
+    // Spring Modulith for modular monolith architecture
     implementation 'org.springframework.modulith:spring-modulith-starter-core'
     implementation 'org.springframework.modulith:spring-modulith-starter-jpa'
+
+    // MapStruct for mapping between objects
     implementation 'org.mapstruct:mapstruct:1.5.3.Final'
-    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+
+    // Dotenv for environment variables management
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
+    // Lombok for reducing boilerplate code
     compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // JWT for handling authentication tokens
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
+    // Development tools
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // PostgreSQL driver for database connectivity
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Testing dependencies
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'org.springframework.security:spring-security-test'
-    // Removed testcontainers dependencies
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
 
 
 dependencyManagement {

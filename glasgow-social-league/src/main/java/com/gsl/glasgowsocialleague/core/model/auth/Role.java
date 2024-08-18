@@ -1,5 +1,6 @@
 package com.gsl.glasgowsocialleague.core.model.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gsl.glasgowsocialleague.core.model.account.Account;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -33,5 +34,6 @@ public class Role {
     private Map<String, Object> permissions;
 
     @OneToMany(mappedBy = "role")
+    @JsonIgnore  // This will prevent accounts from being serialized in the role
     private List<Account> accounts;
 }

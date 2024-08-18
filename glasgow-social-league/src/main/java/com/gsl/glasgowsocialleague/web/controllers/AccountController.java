@@ -22,7 +22,7 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public List<Account> getAllAccounts() {
         log.info("Fetching all accounts");
         return accountService.getAllAccounts();

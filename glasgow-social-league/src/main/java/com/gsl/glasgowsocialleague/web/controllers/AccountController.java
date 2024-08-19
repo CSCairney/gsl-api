@@ -4,12 +4,14 @@ import com.gsl.glasgowsocialleague.core.model.account.Account;
 import com.gsl.glasgowsocialleague.core.model.auth.LoginRequest;
 import com.gsl.glasgowsocialleague.core.service.AccountService;
 import com.gsl.glasgowsocialleague.web.dto.LoginResponse;
+import com.gsl.glasgowsocialleague.web.dto.PasswordUpdateRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,6 +51,14 @@ public class AccountController {
         log.info("Updating account with ID: {} with data: {}", id, account);
         return accountService.updateAccount(id, account);
     }
+
+    @PutMapping("/pass/{id}")
+    public void updatePassword(@PathVariable UUID id, @RequestBody PasswordUpdateRequest passwordUpdateRequest) throws NoSuchAlgorithmException {
+        String newPassword = passwordUpdateRequest.getNewPassword();
+        log.info("Updating account Password with ID: {} with value: {}", id, newPassword);
+        accountService.updatePassword(id, newPassword);
+    }
+
 
     @DeleteMapping("/{id}")
     public void deleteAccount(@PathVariable UUID id) {

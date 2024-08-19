@@ -4,11 +4,12 @@ import com.gsl.glasgowsocialleague.core.model.account.Account;
 import com.gsl.glasgowsocialleague.core.service.AccountService;
 import com.gsl.glasgowsocialleague.infra.gateway.AccountGateway;
 import com.gsl.glasgowsocialleague.web.security.JwtTokenProvider;
+import com.gsl.glasgowsocialleague.web.security.PasswordEncoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -19,13 +20,11 @@ import java.util.UUID;
 public class AccountServiceImpl implements AccountService {
 
     private final AccountGateway accountGateway;
-    private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
     public AccountServiceImpl(AccountGateway accountGateway, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
         this.accountGateway = accountGateway;
-        this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
@@ -38,13 +37,17 @@ public class AccountServiceImpl implements AccountService {
             Account account = accountOpt.get();
             log.info("Account found for email: {}", email);
 
-            // Verify the password by comparing the raw password to the hashed password
-            if (passwordEncoder.matches(rawPassword, account.getPassword())) {
-                log.info("Password match for email: {}. Generating JWT token.", email);
-                // Generate a JWT token
-                return jwtTokenProvider.generateToken(account);
-            } else {
-                log.warn("Password mismatch for email: {}", email);
+            try {
+                // Verify the password by comparing the raw password to the hashed password
+                if (PasswordEncoder.verifyPassword(rawPassword, account.getPassword())) {
+                    log.info("Password match for email: {}. Generating JWT token.", email);
+                    // Generate a JWT token
+                    return jwtTokenProvider.generateToken(account);
+                } else {
+                    log.warn("Password mismatch for email: {}", email);
+                }
+            } catch (Exception e) {
+                log.error("Error during password verification", e);
             }
         } else {
             log.warn("No account found for email: {}", email);
@@ -75,7 +78,13 @@ public class AccountServiceImpl implements AccountService {
 
         // Generate a random password
         String rawPassword = generateRandomPassword();
-        String encodedPassword = passwordEncoder.encode(rawPassword);
+        String encodedPassword;
+        try {
+            encodedPassword = PasswordEncoder.hashPassword(rawPassword);
+        } catch (Exception e) {
+            log.error("Error during password encoding", e);
+            throw new RuntimeException("Password encoding failed", e);
+        }
         account.setPassword(encodedPassword);
 
         Account savedAccount = accountGateway.save(account);
@@ -87,6 +96,7 @@ public class AccountServiceImpl implements AccountService {
 
         return savedAccount;
     }
+
 
     @Override
     public Account updateAccount(UUID id, Account accountDetails) {
@@ -109,7 +119,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void updatePassword(UUID id, String newPassword) {
+    public void updatePassword(UUID id, String newPassword) throws NoSuchAlgorithmException {
         log.info("Updating password for account with ID: {}", id);
 
         // Fetch the account by ID
@@ -119,19 +129,15 @@ public class AccountServiceImpl implements AccountService {
                     return new RuntimeException("Account not found with id " + id);
                 });
 
-        // Encode the new password
-        String encodedNewPassword = passwordEncoder.encode(newPassword);
-
-        log.info("encoded new password: {}", encodedNewPassword);
-
-        // Update the account's password
-        account.setPassword(encodedNewPassword);
+        // Update the account's password directly
+        account.setPassword(PasswordEncoder.hashPassword(newPassword));
         account.setUpdatedAt(OffsetDateTime.now());
 
         // Save the updated account
         accountGateway.save(account);
         log.info("Password updated successfully for account with ID: {}", id);
     }
+
 
     @Override
     public void deleteAccount(UUID id) {

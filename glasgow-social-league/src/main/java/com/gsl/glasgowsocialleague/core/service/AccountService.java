@@ -9,11 +9,15 @@ import java.util.UUID;
 public interface AccountService {
     List<Account> getAllAccounts();
 
+    String authenticate(String email, String rawPassword);
+
     Optional<Account> getAccountById(UUID id);
 
     Account createAccount(Account account);
 
     Account updateAccount(UUID id, Account accountDetails);
+
+    void updatePassword(UUID id, String newPassword);
 
     void deleteAccount(UUID id);
 }

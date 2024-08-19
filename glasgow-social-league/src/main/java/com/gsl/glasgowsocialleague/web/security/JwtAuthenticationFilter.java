@@ -1,92 +1,59 @@
 package com.gsl.glasgowsocialleague.web.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.util.StringUtils;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
+@Slf4j
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Value("${jwt.public.key}")
-    private String publicKeyString;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        try {
-            String jwt = getJwtFromRequest(request);
+        // Extract the token from the Authorization header
+        String token = getTokenFromRequest(request);
+        if (token != null) {
+            log.info("Token found: " + token);
+            if (jwtTokenProvider.validateToken(token)) {
+                log.info("Token is valid.");
+                String email = jwtTokenProvider.getEmailFromToken(token);
 
-            if (StringUtils.hasText(jwt) && validateToken(jwt)) {
-                Claims claims = getClaimsFromToken(jwt);
+                JwtAuthenticationToken authentication = new JwtAuthenticationToken(email, null, jwtTokenProvider.getAuthoritiesFromToken(token));
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                String username = claims.getSubject();
-
-                if (username != null) {
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            username, null, null);
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                log.warn("Token is invalid.");
             }
-        } catch (Exception ex) {
-            // Handle any exceptions here
+        } else {
+            log.info("No token found.");
         }
 
+        // Continue the filter chain
         filterChain.doFilter(request, response);
     }
 
-    private String getJwtFromRequest(HttpServletRequest request) {
+    private String getTokenFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
         return null;
-    }
-
-    private Claims getClaimsFromToken(String token) {
-        Key publicKey = getPublicKey();
-        return Jwts.parser()
-                .setSigningKey(publicKey)
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    private boolean validateToken(String token) {
-        try {
-            getClaimsFromToken(token);
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
-    }
-
-    private Key getPublicKey() {
-        try {
-            String publicKeyPEM = publicKeyString.replace("-----BEGIN PUBLIC KEY-----", "")
-                    .replace("-----END PUBLIC KEY-----", "")
-                    .replaceAll("\\s", "");
-            byte[] encoded = Base64.getDecoder().decode(publicKeyPEM);
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            return keyFactory.generatePublic(keySpec);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

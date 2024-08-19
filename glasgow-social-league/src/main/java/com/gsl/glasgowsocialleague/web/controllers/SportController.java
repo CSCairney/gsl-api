@@ -2,13 +2,15 @@ package com.gsl.glasgowsocialleague.web.controllers;
 
 import com.gsl.glasgowsocialleague.core.model.sport.Sport;
 import com.gsl.glasgowsocialleague.core.service.SportService;
+import com.gsl.glasgowsocialleague.web.dto.sports.SportRequestDTO;
+import com.gsl.glasgowsocialleague.web.dto.sports.SportResponseDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/sports")
@@ -23,28 +25,49 @@ public class SportController {
     }
 
     @GetMapping
-    public List<Sport> getAllSports() {
+    public List<SportResponseDTO> getAllSports() {
         log.info("Fetching all sports");
-        return sportService.getAllSports();
+        return sportService.getAllSports().stream().map(sport -> {
+            SportResponseDTO dto = new SportResponseDTO();
+            BeanUtils.copyProperties(sport, dto);
+            return dto;
+        }).toList();
     }
 
     @GetMapping("/{id}")
-    public Optional<Sport> getSportById(@PathVariable Integer id) {
+    public SportResponseDTO getSportById(@PathVariable Integer id) {
         log.info("Fetching sport with ID: {}", id);
-        return sportService.getSportById(id);
+        Sport sport = sportService.getSportById(id)
+                .orElseThrow(() -> new RuntimeException("Sport not found with id " + id));
+
+        SportResponseDTO dto = new SportResponseDTO();
+        BeanUtils.copyProperties(sport, dto);
+        return dto;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Sport createSport(@RequestBody Sport sport) {
-        log.info("Creating a new sport: {}", sport);
-        return sportService.createSport(sport);
+    public SportResponseDTO createSport(@RequestBody SportRequestDTO sportRequestDTO) {
+        log.info("Creating a new sport: {}", sportRequestDTO);
+        Sport sport = new Sport();
+        BeanUtils.copyProperties(sportRequestDTO, sport);
+        sport = sportService.createSport(sport);
+
+        SportResponseDTO dto = new SportResponseDTO();
+        BeanUtils.copyProperties(sport, dto);
+        return dto;
     }
 
     @PutMapping("/{id}")
-    public Sport updateSport(@PathVariable Integer id, @RequestBody Sport sport) {
-        log.info("Updating sport with ID: {} with data: {}", id, sport);
-        return sportService.updateSport(id, sport);
+    public SportResponseDTO updateSport(@PathVariable Integer id, @RequestBody SportRequestDTO sportRequestDTO) {
+        log.info("Updating sport with ID: {} with data: {}", id, sportRequestDTO);
+        Sport sport = new Sport();
+        BeanUtils.copyProperties(sportRequestDTO, sport);
+        sport = sportService.updateSport(id, sport);
+
+        SportResponseDTO dto = new SportResponseDTO();
+        BeanUtils.copyProperties(sport, dto);
+        return dto;
     }
 
     @DeleteMapping("/{id}")

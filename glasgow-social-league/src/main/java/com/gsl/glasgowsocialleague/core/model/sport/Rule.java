@@ -20,4 +20,7 @@ public class Rule {
     @Column(name = "rule_text", nullable = false, length = Integer.MAX_VALUE)
     private String ruleText;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sport_id")
+    private Sport sport;
 }

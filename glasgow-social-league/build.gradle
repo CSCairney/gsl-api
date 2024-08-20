@@ -42,7 +42,6 @@ dependencies {
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
     implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
 
-
     // Flyway for database migrations
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
@@ -79,8 +78,6 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-
-
 dependencyManagement {
     imports {
         mavenBom "org.springframework.modulith:spring-modulith-bom:${springModulithVersion}"
@@ -88,11 +85,38 @@ dependencyManagement {
 }
 
 tasks.named('test') {
-    outputs.dir snippetsDir
     useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    outputs.dir snippetsDir
+    dependsOn startDockerContainer
+    finalizedBy stopDockerContainer
+
+    doFirst {
+        println "Running tests..."
+    }
 }
 
 tasks.named('asciidoctor') {
     inputs.dir snippetsDir
     dependsOn test
+}
+
+task startDockerContainer(type: Exec) {
+    description = 'Starts the Docker container for the test database'
+    commandLine 'docker-compose', '-f', 'compose.yaml', 'up', '-d'
+
+    doFirst {
+        println "Starting Docker container..."
+    }
+}
+
+task stopDockerContainer(type: Exec) {
+    description = 'Stops and removes the Docker container after tests are complete'
+    commandLine 'docker-compose', '-f', 'compose.yaml', 'down'
+
+    doFirst {
+        println "Stopping Docker container..."
+    }
 }

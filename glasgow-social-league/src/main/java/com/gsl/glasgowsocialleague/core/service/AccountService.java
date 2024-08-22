@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface AccountService {
     List<Account> getAllAccounts();
 
-    String authenticate(String email, String rawPassword);
+    Account authenticate(String email, String rawPassword);
 
     Optional<Account> getAccountById(UUID id);
 

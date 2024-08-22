@@ -71,15 +71,16 @@ public class AccountController {
         log.info("Attempting to log in user with email: {}", loginRequest.getEmail());
 
         // Authenticate the user using the AccountService
-        String token = accountService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+        Account accountWithToken = accountService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
 
-        if (token == null) {
+        if (accountWithToken.getToken() == null) {
             // Return 401 Unauthorized if authentication fails
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         // Return the JWT token if authentication is successful
-        return ResponseEntity.ok(new LoginResponse(token));
+        return ResponseEntity.ok(new LoginResponse(
+                accountWithToken.getToken(), accountWithToken.getEmail(), accountWithToken.getName(), accountWithToken.getId()));
     }
 
 }

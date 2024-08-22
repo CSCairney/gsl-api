@@ -1,12 +1,11 @@
 package com.gsl.glasgowsocialleague.web.controllers;
 
 import com.gsl.glasgowsocialleague.core.model.session.SessionParticipant;
-import com.gsl.glasgowsocialleague.core.model.session.SessionParticipantId;
 import com.gsl.glasgowsocialleague.core.service.SessionParticipantService;
 import com.gsl.glasgowsocialleague.web.dto.sessionParticipants.SessionParticipantRequestDTO;
 import com.gsl.glasgowsocialleague.web.dto.sessionParticipants.SessionParticipantResponseDTO;
+import com.gsl.glasgowsocialleague.web.mapper.SessionParticipantMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +20,12 @@ import java.util.stream.Collectors;
 public class SessionParticipantController {
 
     private final SessionParticipantService sessionParticipantService;
+    private final SessionParticipantMapper sessionParticipantMapper;
 
     @Autowired
-    public SessionParticipantController(SessionParticipantService sessionParticipantService) {
+    public SessionParticipantController(SessionParticipantService sessionParticipantService, SessionParticipantMapper sessionParticipantMapper) {
         this.sessionParticipantService = sessionParticipantService;
+        this.sessionParticipantMapper = sessionParticipantMapper;
     }
 
     @GetMapping("/session/{sessionId}")
@@ -32,7 +33,7 @@ public class SessionParticipantController {
         log.info("Fetching participants for session with ID: {}", sessionId);
         return sessionParticipantService.getParticipantsBySessionId(sessionId)
                 .stream()
-                .map(this::convertToDto)
+                .map(sessionParticipantMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -41,7 +42,7 @@ public class SessionParticipantController {
         log.info("Fetching sessions for account with ID: {}", accountId);
         return sessionParticipantService.getSessionsByAccountId(accountId)
                 .stream()
-                .map(this::convertToDto)
+                .map(sessionParticipantMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -49,30 +50,18 @@ public class SessionParticipantController {
     @ResponseStatus(HttpStatus.CREATED)
     public SessionParticipantResponseDTO addParticipantToSession(@RequestBody SessionParticipantRequestDTO sessionParticipantRequestDTO) {
         log.info("Adding a participant to the session: {}", sessionParticipantRequestDTO);
-        SessionParticipant sessionParticipant = new SessionParticipant();
-        SessionParticipantId id = new SessionParticipantId();
-        id.setSessionId(sessionParticipantRequestDTO.getSessionId());
-        id.setAccountId(sessionParticipantRequestDTO.getAccountId());
-        sessionParticipant.setId(id);
-        sessionParticipant.setAccount(null);  // Set the account entity based on your application's logic
 
+        SessionParticipant sessionParticipant = sessionParticipantMapper.toEntity(sessionParticipantRequestDTO);
         SessionParticipant createdParticipant = sessionParticipantService.addParticipantToSession(sessionParticipant);
-        return convertToDto(createdParticipant);
+
+        return sessionParticipantMapper.toDto(createdParticipant);
     }
 
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeParticipantFromSession(@RequestBody SessionParticipantRequestDTO sessionParticipantRequestDTO) {
         log.info("Removing a participant from the session: {}", sessionParticipantRequestDTO);
-        SessionParticipantId sessionParticipantId = new SessionParticipantId();
-        sessionParticipantId.setSessionId(sessionParticipantRequestDTO.getSessionId());
-        sessionParticipantId.setAccountId(sessionParticipantRequestDTO.getAccountId());
-        sessionParticipantService.removeParticipantFromSession(sessionParticipantId);
-    }
-
-    private SessionParticipantResponseDTO convertToDto(SessionParticipant sessionParticipant) {
-        SessionParticipantResponseDTO sessionParticipantResponseDTO = new SessionParticipantResponseDTO();
-        BeanUtils.copyProperties(sessionParticipant.getId(), sessionParticipantResponseDTO);
-        return sessionParticipantResponseDTO;
+        SessionParticipant sessionParticipant = sessionParticipantMapper.toEntity(sessionParticipantRequestDTO);
+        sessionParticipantService.removeParticipantFromSession(sessionParticipant.getId());
     }
 }

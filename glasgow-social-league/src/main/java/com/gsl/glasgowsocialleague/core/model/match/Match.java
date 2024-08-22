@@ -1,6 +1,8 @@
 package com.gsl.glasgowsocialleague.core.model.match;
 
 import com.gsl.glasgowsocialleague.core.model.account.Account;
+import com.gsl.glasgowsocialleague.core.model.season.Season;
+import com.gsl.glasgowsocialleague.core.model.session.Session;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -52,4 +54,13 @@ public class Match {
     @JoinColumn(name = "last_updated_by")
     private Account lastUpdatedBy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "session_id", nullable = false)
+    private Session session;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JoinColumn(name = "season_id")
+    private Season season;
 }

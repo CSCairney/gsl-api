@@ -29,7 +29,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public String authenticate(String email, String rawPassword) {
+    public Account authenticate(String email, String rawPassword) {
         log.info("Authenticating user with email: {}", email);
         Optional<Account> accountOpt = accountGateway.findByEmail(email);
 
@@ -42,7 +42,13 @@ public class AccountServiceImpl implements AccountService {
                 if (PasswordEncoder.verifyPassword(rawPassword, account.getPassword())) {
                     log.info("Password match for email: {}. Generating JWT token.", email);
                     // Generate a JWT token
-                    return jwtTokenProvider.generateToken(account);
+                    return Account.builder()
+                            .email(account.getEmail())
+                            .role(account.getRole())
+                            .name(account.getName())
+                            .id(account.getId())
+                            .token(jwtTokenProvider.generateToken(account))
+                            .build();
                 } else {
                     log.warn("Password mismatch for email: {}", email);
                 }

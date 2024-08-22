@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.OffsetDateTime;
@@ -13,6 +16,9 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder(toBuilder = true)
 @Entity
 @Table(name = "accounts")
 public class Account {
@@ -49,4 +55,7 @@ public class Account {
     @ColumnDefault("now()")
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
+
+    @Transient
+    private String token;
 }

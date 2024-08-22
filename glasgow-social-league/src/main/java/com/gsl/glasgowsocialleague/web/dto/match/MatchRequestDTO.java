@@ -9,6 +9,9 @@ import java.util.UUID;
 @Getter
 @Setter
 public class MatchRequestDTO {
+
+    private Integer id;
+
     @NotNull
     private Integer sessionId;
 
@@ -34,4 +37,3 @@ public class MatchRequestDTO {
     @NotNull
     private Integer seasonId;
 }
-

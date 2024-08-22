@@ -53,11 +53,11 @@ public class MatchController {
         return matchMapper.toDto(createdMatch);
     }
 
-    @PutMapping("/{id}")
-    public MatchResponseDTO updateMatch(@PathVariable Integer id, @RequestBody MatchRequestDTO matchRequestDTO) {
-        log.info("Updating match with ID: {} with data: {}", id, matchRequestDTO);
+    @PutMapping
+    public MatchResponseDTO updateMatch(@RequestBody MatchRequestDTO matchRequestDTO) {
+        log.info("Updating match with ID: {} with data: {}", matchRequestDTO.getId(), matchRequestDTO);
         Match match = matchMapper.toEntity(matchRequestDTO);
-        Match updatedMatch = matchService.updateMatch(id, match);
+        Match updatedMatch = matchService.updateMatch(match.getId(), match);
         return matchMapper.toDto(updatedMatch);
     }
 

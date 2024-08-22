@@ -27,6 +27,11 @@ public class MatchMapper {
     public Match toEntity(MatchRequestDTO dto) {
         Match match = new Match();
 
+        // Set the ID if it exists (for updating an existing match)
+        if (dto.getId() != null) {
+            match.setId(dto.getId());
+        }
+
         Account playerOne = accountService.getAccountById(dto.getPlayerOneId())
                 .orElseThrow(() -> new RuntimeException("Player One not found with id " + dto.getPlayerOneId()));
         Account playerTwo = accountService.getAccountById(dto.getPlayerTwoId())
@@ -59,7 +64,7 @@ public class MatchMapper {
     public MatchResponseDTO toDto(Match entity) {
         MatchResponseDTO dto = new MatchResponseDTO();
 
-        dto.setId(entity.getId());
+        dto.setId(entity.getId()); // Ensure the ID is passed in the response DTO
         dto.setPlayerOneId(entity.getPlayerOne() != null ? entity.getPlayerOne().getId() : null);
         dto.setPlayerTwoId(entity.getPlayerTwo() != null ? entity.getPlayerTwo().getId() : null);
         dto.setScorePlayerOne(entity.getScorePlayerOne());
@@ -74,3 +79,4 @@ public class MatchMapper {
         return dto;
     }
 }
+

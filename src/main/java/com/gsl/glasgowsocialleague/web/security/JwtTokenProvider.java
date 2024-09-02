@@ -23,7 +23,7 @@ public class JwtTokenProvider {
     private String secretKey;
 
     @Value("${jwt.expiration}")
-    private long validityInMilliseconds; // e.g., 3600000 (1 hour)
+    private long validityInMilliseconds;
 
     public String generateToken(Account account) {
         Claims claims = Jwts.claims().setSubject(account.getEmail());

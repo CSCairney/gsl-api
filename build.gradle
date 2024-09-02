@@ -38,7 +38,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    // JWT helpers
+    // JAXB for XML processing (may be unnecessary for Spring Boot 3+)
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
     implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
 
@@ -50,7 +50,7 @@ dependencies {
     implementation 'org.springframework.modulith:spring-modulith-starter-core'
     implementation 'org.springframework.modulith:spring-modulith-starter-jpa'
 
-    // MapStruct for mapping between objects
+    // MapStruct for object mapping
     implementation 'org.mapstruct:mapstruct:1.5.3.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
 
@@ -130,15 +130,6 @@ tasks.named('jar') {
     }
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(22)
-    }
-    sourceCompatibility = '22'
-    targetCompatibility = '22'
-    withSourcesJar()
-}
-
 bootJar {
     archiveFileName = 'glasgow-social-league.jar'
 }
@@ -146,3 +137,4 @@ bootJar {
 springBoot {
     mainClass.set('com.gsl.glasgowsocialleague.GlasgowSocialLeagueApplication')
 }
+

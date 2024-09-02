@@ -125,11 +125,24 @@ task stopDockerContainer(type: Exec) {
 tasks.named('jar') {
     manifest {
         attributes(
-                'Main-Class': 'com.gsl.GlasgowSocialLeagueApplication'
+                'Main-Class': 'com.gsl.glasgowsocialleague.GlasgowSocialLeagueApplication'
         )
     }
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(22)
+    }
+    sourceCompatibility = '22'
+    targetCompatibility = '22'
+    withSourcesJar()
+}
+
 bootJar {
     archiveFileName = 'glasgow-social-league.jar'
+}
+
+springBoot {
+    mainClass.set('com.gsl.glasgowsocialleague.GlasgowSocialLeagueApplication')
 }

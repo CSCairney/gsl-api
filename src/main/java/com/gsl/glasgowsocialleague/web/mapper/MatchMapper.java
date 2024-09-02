@@ -27,7 +27,6 @@ public class MatchMapper {
     public Match toEntity(MatchRequestDTO dto) {
         Match match = new Match();
 
-        // Set the ID if it exists (for updating an existing match)
         if (dto.getId() != null) {
             match.setId(dto.getId());
         }

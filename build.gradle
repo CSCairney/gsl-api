@@ -130,11 +130,3 @@ tasks.named('jar') {
     }
 }
 
-bootJar {
-    archiveFileName = 'glasgow-social-league.jar'
-}
-
-springBoot {
-    mainClass.set('com.gsl.glasgowsocialleague.GlasgowSocialLeagueApplication')
-}
-

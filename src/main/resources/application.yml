@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: "glasgow-social-league"
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    baseline-on-migrate: false
+    baseline-version: 1
+
+logging:
+  level:
+    org:
+      springframework:
+        jdbc:
+          core: DEBUG
+        security: DEBUG
+      flywaydb:
+        core:
+          internal: DEBUG
+      postgresql: DEBUG
+
+jwt:
+  public:
+    key: ${JWT_PUBLIC_KEY}
+  secret: ${JWT_SECRET_KEY}
+  expiration: 3600000

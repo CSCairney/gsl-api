@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydatabase
+    username: myuser
+    password: secret
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  flyway:
+    enabled: false
+
+jwt:
+  public:
+    key: 1231231313213132
+  secret: a2kla3msd4dol12n31289hd12
+  expiration: 3600000

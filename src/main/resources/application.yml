@@ -10,6 +10,9 @@ spring:
     baseline-on-migrate: false
     baseline-version: 1
 
+server:
+  port: ${PORT:8080}
+
 logging:
   level:
     org:

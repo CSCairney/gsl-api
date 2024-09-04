@@ -7,6 +7,9 @@ import com.gsl.glasgowsocialleague.web.dto.sessions.SessionResponseDTO;
 import com.gsl.glasgowsocialleague.web.mapper.SessionMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,12 +32,16 @@ public class SessionController {
     }
 
     @GetMapping
-    public List<SessionResponseDTO> getAllSessions() {
-        log.info("Fetching all sessions");
-        return sessionService.getAllSessions()
-                .stream()
-                .map(sessionMapper::toDto)
-                .collect(Collectors.toList());
+    public Page<SessionResponseDTO> getAllSessions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Integer sportId) {
+        log.info("Fetching sessions with pagination - page: {}, size: {}, sportId: {}", page, size, sportId);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Session> sessions = sessionService.getAllSessions(pageable, sportId);
+
+        return sessions.map(sessionMapper::toDto);
     }
 
     @GetMapping("/{id}")

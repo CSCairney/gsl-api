@@ -5,6 +5,8 @@ import com.gsl.glasgowsocialleague.core.service.SessionService;
 import com.gsl.glasgowsocialleague.infra.gateway.SessionGateway;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,9 +24,12 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public List<Session> getAllSessions() {
-        log.info("Fetching all sessions");
-        return sessionGateway.findAll();
+    public Page<Session> getAllSessions(Pageable pageable, Integer sportId) {
+        log.info("Fetching all sessions with pagination, sportId: {}", sportId);
+        if (sportId != null) {
+            return sessionGateway.findBySportId(sportId, pageable);
+        }
+        return sessionGateway.findAll(pageable);
     }
 
     @Override

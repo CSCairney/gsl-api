@@ -1,10 +1,13 @@
 package com.gsl.glasgowsocialleague.web.controllers;
 
 import com.gsl.glasgowsocialleague.core.model.session.Session;
+import com.gsl.glasgowsocialleague.core.service.SessionParticipantService;
 import com.gsl.glasgowsocialleague.core.service.SessionService;
+import com.gsl.glasgowsocialleague.web.dto.sessionParticipants.SessionParticipantResponseDTO;
 import com.gsl.glasgowsocialleague.web.dto.sessions.SessionRequestDTO;
 import com.gsl.glasgowsocialleague.web.dto.sessions.SessionResponseDTO;
 import com.gsl.glasgowsocialleague.web.mapper.SessionMapper;
+import com.gsl.glasgowsocialleague.web.mapper.SessionParticipantMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,26 +26,50 @@ import java.util.stream.Collectors;
 public class SessionController {
 
     private final SessionService sessionService;
+    private final SessionParticipantService sessionParticipantService;
     private final SessionMapper sessionMapper;
+    private final SessionParticipantMapper sessionParticipantMapper;
 
     @Autowired
-    public SessionController(SessionService sessionService, SessionMapper sessionMapper) {
+    public SessionController(
+            SessionService sessionService,
+            SessionMapper sessionMapper,
+            SessionParticipantService sessionParticipantService,
+            SessionParticipantMapper sessionParticipantMapper) {
         this.sessionService = sessionService;
         this.sessionMapper = sessionMapper;
+        this.sessionParticipantService = sessionParticipantService;
+        this.sessionParticipantMapper = sessionParticipantMapper;
     }
 
     @GetMapping
     public Page<SessionResponseDTO> getAllSessions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Integer sportId) {
-        log.info("Fetching sessions with pagination - page: {}, size: {}, sportId: {}", page, size, sportId);
+            @RequestParam(required = false) Integer sportId,
+            @RequestParam(defaultValue = "false") boolean includeParticipants) { // New parameter
+        log.info("Fetching sessions with pagination - page: {}, size: {}, sportId: {}, includeParticipants: {}", page, size, sportId, includeParticipants);
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Session> sessions = sessionService.getAllSessions(pageable, sportId);
 
-        return sessions.map(sessionMapper::toDto);
+        // Convert sessions to DTOs
+        Page<SessionResponseDTO> sessionResponseDTOS = sessions.map(sessionMapper::toDto);
+
+        // If includeParticipants is true, fetch and set participants for each session
+        if (includeParticipants) {
+            sessionResponseDTOS.forEach(sessionDTO -> {
+                List<SessionParticipantResponseDTO> participants = sessionParticipantService.getParticipantsBySessionId(sessionDTO.getId())
+                        .stream()
+                        .map(sessionParticipantMapper::toDto)
+                        .collect(Collectors.toList());
+                sessionDTO.setParticipants(participants); // Add a setParticipants method in the DTO
+            });
+        }
+
+        return sessionResponseDTOS;
     }
+
 
     @GetMapping("/{id}")
     public Optional<SessionResponseDTO> getSessionById(@PathVariable Integer id) {

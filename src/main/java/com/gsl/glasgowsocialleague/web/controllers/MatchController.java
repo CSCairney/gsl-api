@@ -29,9 +29,12 @@ public class MatchController {
     }
 
     @GetMapping
-    public List<MatchResponseDTO> getAllMatches() {
+    public List<MatchResponseDTO> getAllMatches(
+            @RequestParam(required = false) Integer sportId,
+            @RequestParam(required = false) Integer amount
+    ) {
         log.info("Fetching all matches");
-        return matchService.getAllMatches()
+        return matchService.getAllMatches(sportId, amount)
                 .stream()
                 .map(matchMapper::toDto)
                 .collect(Collectors.toList());

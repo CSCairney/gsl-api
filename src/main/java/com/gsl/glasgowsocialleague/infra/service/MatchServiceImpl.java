@@ -22,9 +22,19 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
-    public List<Match> getAllMatches() {
-        log.info("Fetching all matches");
-        return matchGateway.findAll();
+    public List<Match> getAllMatches(Integer sportId, Integer amount) {
+        log.info("Fetching matches with sportId: {} and amount: {}", sportId, amount);
+
+        if (sportId != null && amount != null && amount > 0) {
+            log.info("Fetching with sportId: {} and amount: {}", sportId, amount);
+            return matchGateway.findBySportIdWithLimit(sportId, amount);
+        } else if (sportId != null) {
+            log.info("Fetching with amount: {}", amount);
+            return matchGateway.findBySportId(sportId);
+        } else {
+            log.info("Fetching all matches");
+            return matchGateway.findAll();
+        }
     }
 
     @Override

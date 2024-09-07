@@ -31,7 +31,7 @@ public class MatchController {
     @GetMapping
     public List<MatchResponseDTO> getAllMatches(
             @RequestParam(required = false) Integer sportId,
-            @RequestParam(required = false) Integer amount
+            @RequestParam(defaultValue = "30") Integer amount
     ) {
         log.info("Fetching all matches");
         return matchService.getAllMatches(sportId, amount)
